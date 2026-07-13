@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Apple } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { calcTargets } from '../lib/coach'
@@ -137,7 +138,10 @@ export default function Nutrition() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-neutral-900">Nutrição</h1>
+        <h1 className="page-title flex items-center gap-2">
+          <Apple className="text-brand-500" size={22} />
+          Nutrição
+        </h1>
         <input type="date" className="input w-auto" value={date} onChange={(e) => setDate(e.target.value)} />
       </div>
 
@@ -155,7 +159,7 @@ export default function Nutrition() {
       )}
 
       <form onSubmit={addLog} className="card space-y-3">
-        <p className="text-sm font-medium text-neutral-700">Adicionar alimento</p>
+        <p className="section-label">Adicionar alimento</p>
         <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)}>
           {Object.entries(MEAL_LABELS).map(([k, v]) => (
             <option key={k} value={k}>
@@ -165,11 +169,11 @@ export default function Nutrition() {
         </select>
 
         <div className="flex items-center gap-2 text-xs text-neutral-500">
-          <button type="button" className={!useCustom ? 'font-semibold text-neutral-900' : ''} onClick={() => setUseCustom(false)}>
+          <button type="button" className={!useCustom ? 'font-semibold text-brand-400' : 'text-neutral-500'} onClick={() => setUseCustom(false)}>
             Da lista
           </button>
           <span>·</span>
-          <button type="button" className={useCustom ? 'font-semibold text-neutral-900' : ''} onClick={() => setUseCustom(true)}>
+          <button type="button" className={useCustom ? 'font-semibold text-brand-400' : 'text-neutral-500'} onClick={() => setUseCustom(true)}>
             Alimento livre (só calorias)
           </button>
         </div>
@@ -200,17 +204,17 @@ export default function Nutrition() {
 
       {Object.entries(MEAL_LABELS).map(([key, label]) => (
         <div key={key} className="card">
-          <p className="font-medium text-neutral-900 mb-2">{label}</p>
+          <p className="font-semibold text-white mb-2">{label}</p>
           {grouped[key].length === 0 ? (
             <p className="text-xs text-neutral-400">Nada registrado</p>
           ) : (
             <div className="space-y-1">
               {grouped[key].map((l) => (
-                <div key={l.id} className="flex items-center justify-between text-sm text-neutral-600">
+                <div key={l.id} className="flex items-center justify-between text-sm text-neutral-300">
                   <span>
                     {l.food_name} {l.quantity_g > 1 ? `(${l.quantity_g}g)` : ''} — {l.calories} kcal
                   </span>
-                  <button onClick={() => removeLog(l.id)} className="text-xs text-red-500">
+                  <button onClick={() => removeLog(l.id)} className="text-xs text-red-400 hover:text-red-300 transition">
                     remover
                   </button>
                 </div>
@@ -227,7 +231,7 @@ function Stat({ label, value, sub }) {
   return (
     <div>
       <p className="text-[10px] uppercase tracking-wide text-neutral-400">{label}</p>
-      <p className="text-sm font-semibold text-neutral-900">{value}</p>
+      <p className="text-sm font-semibold text-white">{value}</p>
       {sub && <p className="text-[10px] text-neutral-400">{sub}</p>}
     </div>
   )

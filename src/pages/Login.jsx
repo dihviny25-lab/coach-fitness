@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Dumbbell } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 export default function Login() {
@@ -53,38 +54,43 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center mb-1 text-neutral-900">Coach Fitness</h1>
+        <div className="flex justify-center mb-4">
+          <div className="w-14 h-14 rounded-2xl bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-950/60">
+            <Dumbbell size={28} className="text-white" />
+          </div>
+        </div>
+        <h1 className="text-2xl font-extrabold text-center mb-1 text-white uppercase tracking-tight">Coach Fitness</h1>
         <p className="text-center text-neutral-500 mb-6 text-sm">Treino, medidas e nutrição em um só lugar</p>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+        <div className="card">
           <button
             type="button"
             onClick={handleGoogle}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-2 border border-neutral-300 rounded-lg py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 mb-4"
+            className="w-full flex items-center justify-center gap-2 border border-neutral-800 rounded-lg py-2 text-sm font-medium text-neutral-200 bg-neutral-950 hover:bg-neutral-800 disabled:opacity-50 mb-4 transition"
           >
             <GoogleIcon />
             {googleLoading ? 'Redirecionando...' : 'Continuar com Google'}
           </button>
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-neutral-200" />
-            <span className="text-xs text-neutral-400">ou</span>
-            <div className="h-px flex-1 bg-neutral-200" />
+            <div className="h-px flex-1 bg-neutral-800" />
+            <span className="text-xs text-neutral-500">ou</span>
+            <div className="h-px flex-1 bg-neutral-800" />
           </div>
 
-          <div className="flex mb-6 rounded-lg bg-neutral-100 p-1 text-sm font-medium">
+          <div className="flex mb-6 rounded-lg bg-neutral-950 border border-neutral-800 p-1 text-sm font-medium">
             <button
-              className={`flex-1 py-1.5 rounded-md transition ${mode === 'login' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
+              className={`flex-1 py-1.5 rounded-md transition ${mode === 'login' ? 'bg-brand-500 text-white' : 'text-neutral-500'}`}
               onClick={() => setMode('login')}
               type="button"
             >
               Entrar
             </button>
             <button
-              className={`flex-1 py-1.5 rounded-md transition ${mode === 'signup' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
+              className={`flex-1 py-1.5 rounded-md transition ${mode === 'signup' ? 'bg-brand-500 text-white' : 'text-neutral-500'}`}
               onClick={() => setMode('signup')}
               type="button"
             >
@@ -94,24 +100,11 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-3">
             {mode === 'signup' && (
-              <input
-                className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
-                placeholder="Seu nome"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
+              <input className="input" placeholder="Seu nome" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
             )}
+            <input className="input" placeholder="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             <input
-              className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              placeholder="E-mail"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <input
-              className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              className="input"
               placeholder="Senha"
               type="password"
               value={password}
@@ -120,14 +113,10 @@ export default function Login() {
               required
             />
 
-            {error && <p className="text-red-600 text-sm">{error}</p>}
-            {info && <p className="text-green-700 text-sm">{info}</p>}
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {info && <p className="text-green-400 text-sm">{info}</p>}
 
-            <button
-              className="w-full bg-neutral-900 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50"
-              disabled={loading}
-              type="submit"
-            >
+            <button className="btn-primary w-full" disabled={loading} type="submit">
               {loading ? 'Aguarde...' : mode === 'signup' ? 'Criar conta' : 'Entrar'}
             </button>
           </form>

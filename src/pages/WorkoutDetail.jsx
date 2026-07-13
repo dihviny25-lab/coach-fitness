@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { Trash2, CheckCircle2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 export default function WorkoutDetail() {
@@ -94,17 +95,18 @@ export default function WorkoutDetail() {
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900">{workout.name || 'Treino'}</h1>
+          <h1 className="text-xl font-extrabold text-white uppercase tracking-tight">{workout.name || 'Treino'}</h1>
           <p className="text-xs text-neutral-500">{new Date(workout.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
         </div>
-        <button onClick={deleteWorkout} className="text-xs text-red-600">
-          Excluir treino
+        <button onClick={deleteWorkout} className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition">
+          <Trash2 size={14} />
+          Excluir
         </button>
       </div>
 
       {planExercises.length > 0 && (
         <div className="card space-y-2">
-          <p className="text-sm font-medium text-neutral-700">Sugestão do plano</p>
+          <p className="section-label">Sugestão do plano</p>
           <div className="flex flex-wrap gap-2">
             {planExercises.map((pe) => {
               const done = sets.filter((s) => s.exercise_id === pe.exercise_id).length
@@ -114,14 +116,15 @@ export default function WorkoutDetail() {
                   key={pe.id}
                   type="button"
                   onClick={() => setExerciseId(pe.exercise_id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border transition ${
                     complete
-                      ? 'bg-green-50 text-green-700 border-green-200'
+                      ? 'bg-green-500/10 text-green-400 border-green-500/30'
                       : exerciseId === pe.exercise_id
-                        ? 'bg-neutral-900 text-white border-neutral-900'
-                        : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+                        ? 'bg-brand-500 text-white border-brand-500'
+                        : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-600'
                   }`}
                 >
+                  {complete && <CheckCircle2 size={12} />}
                   {pe.exercises?.name} · {done}/{pe.target_sets ?? '-'} × {pe.target_reps}
                 </button>
               )
@@ -131,7 +134,7 @@ export default function WorkoutDetail() {
       )}
 
       <form onSubmit={addSet} className="card space-y-3">
-        <p className="text-sm font-medium text-neutral-700">Registrar série</p>
+        <p className="section-label">Registrar série</p>
         <select className="input" value={exerciseId} onChange={(e) => setExerciseId(e.target.value)} required>
           <option value="">Selecione o exercício</option>
           {exercises.map((ex) => (
@@ -154,14 +157,15 @@ export default function WorkoutDetail() {
         {grouped.length === 0 && <p className="text-sm text-neutral-500">Nenhuma série registrada ainda.</p>}
         {grouped.map(([label, groupSets]) => (
           <div key={label} className="card">
-            <p className="font-medium text-neutral-900 mb-2">{label}</p>
+            <p className="font-semibold text-white mb-2">{label}</p>
             <div className="space-y-1">
               {groupSets.map((s) => (
-                <div key={s.id} className="flex items-center justify-between text-sm text-neutral-600">
+                <div key={s.id} className="flex items-center justify-between text-sm text-neutral-300">
                   <span>
-                    Série {s.set_number}: {s.reps ?? '-'} reps × {s.weight_kg ?? '-'} kg {s.rpe ? `· RPE ${s.rpe}` : ''}
+                    Série {s.set_number}: <span className="text-brand-400 font-semibold">{s.reps ?? '-'}</span> reps ×{' '}
+                    <span className="text-brand-400 font-semibold">{s.weight_kg ?? '-'}</span> kg {s.rpe ? `· RPE ${s.rpe}` : ''}
                   </span>
-                  <button onClick={() => removeSet(s.id)} className="text-xs text-red-500">
+                  <button onClick={() => removeSet(s.id)} className="text-xs text-red-400 hover:text-red-300 transition">
                     remover
                   </button>
                 </div>

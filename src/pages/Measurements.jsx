@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { Ruler } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
@@ -64,17 +65,20 @@ export default function Measurements() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
-      <h1 className="text-xl font-bold text-neutral-900">Medidas</h1>
+      <h1 className="page-title flex items-center gap-2">
+        <Ruler className="text-brand-500" size={22} />
+        Medidas
+      </h1>
 
       {latest && first && rows.length > 1 && (
         <div className="card flex items-center justify-between">
           <div>
             <p className="text-xs text-neutral-500">Peso atual</p>
-            <p className="text-lg font-semibold text-neutral-900">{latest.weight_kg ?? '-'} kg</p>
+            <p className="text-2xl font-extrabold text-white">{latest.weight_kg ?? '-'} kg</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-neutral-500">Variação total</p>
-            <p className={`text-lg font-semibold ${latest.weight_kg - first.weight_kg <= 0 ? 'text-green-600' : 'text-orange-600'}`}>
+            <p className={`text-2xl font-extrabold ${latest.weight_kg - first.weight_kg <= 0 ? 'text-green-400' : 'text-orange-400'}`}>
               {(latest.weight_kg - first.weight_kg).toFixed(1)} kg
             </p>
           </div>
@@ -83,21 +87,21 @@ export default function Measurements() {
 
       {chartData.length > 1 && (
         <div className="card">
-          <p className="text-sm font-medium text-neutral-700 mb-2">Evolução do peso</p>
+          <p className="section-label mb-2">Evolução do peso</p>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-              <YAxis domain={['auto', 'auto']} tick={{ fontSize: 11 }} width={35} />
-              <Tooltip />
-              <Line type="monotone" dataKey="peso" stroke="#171717" strokeWidth={2} dot={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#a3a3a3' }} stroke="#404040" />
+              <YAxis domain={['auto', 'auto']} tick={{ fontSize: 11, fill: '#a3a3a3' }} stroke="#404040" width={35} />
+              <Tooltip contentStyle={{ background: '#171717', border: '1px solid #404040', borderRadius: 8, fontSize: 12, color: '#fff' }} />
+              <Line type="monotone" dataKey="peso" stroke="#aa3bff" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="card space-y-3">
-        <p className="text-sm font-medium text-neutral-700">Nova medição</p>
+        <p className="section-label">Nova medição</p>
         <input type="date" className="input" value={form.date} onChange={(e) => update('date', e.target.value)} />
         <div className="grid grid-cols-2 gap-3">
           <input className="input" type="number" step="0.1" placeholder="Peso (kg)" value={form.weight_kg} onChange={(e) => update('weight_kg', e.target.value)} />
@@ -120,7 +124,7 @@ export default function Measurements() {
           [...rows].reverse().map((r) => (
             <div key={r.id} className="card flex items-center justify-between text-sm">
               <span className="text-neutral-500">{new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
-              <span className="text-neutral-900 font-medium">{r.weight_kg ?? '-'} kg</span>
+              <span className="text-white font-semibold">{r.weight_kg ?? '-'} kg</span>
             </div>
           ))
         )}

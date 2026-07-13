@@ -1,7 +1,21 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-50: #f4ecff;
+  --color-brand-200: #d9b8ff;
+  --color-brand-400: #aa3bff;
+  --color-brand-500: #7e14ff;
+  --color-brand-600: #6a0fe0;
+  --color-brand-950: #1c0640;
+}
+
 :root {
-  color-scheme: light;
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #0a0a0b;
 }
 
 body {
@@ -10,15 +24,21 @@ body {
 
 @layer components {
   .input {
-    @apply w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white;
+    @apply w-full border border-neutral-800 rounded-lg px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500;
   }
   .card {
-    @apply bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm;
+    @apply bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-lg shadow-black/20;
   }
   .btn-primary {
-    @apply bg-neutral-900 text-white rounded-lg py-2 px-4 text-sm font-medium disabled:opacity-50;
+    @apply bg-brand-500 hover:bg-brand-600 text-white rounded-lg py-2 px-4 text-sm font-semibold tracking-wide disabled:opacity-50 transition shadow-md shadow-brand-950/40;
   }
   .btn-secondary {
-    @apply bg-neutral-100 text-neutral-900 rounded-lg py-2 px-4 text-sm font-medium disabled:opacity-50;
+    @apply bg-neutral-800 hover:bg-neutral-700 text-neutral-100 rounded-lg py-2 px-4 text-sm font-medium disabled:opacity-50 transition;
+  }
+  .page-title {
+    @apply text-xl font-extrabold text-white tracking-tight uppercase;
+  }
+  .section-label {
+    @apply text-[11px] font-bold uppercase tracking-widest text-brand-400;
   }
 }

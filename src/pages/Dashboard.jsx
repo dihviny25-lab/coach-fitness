@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Flame, Scale, Utensils, Dumbbell, Ruler, Apple } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { calcTargets, goalLabel } from '../lib/coach'
@@ -86,14 +87,17 @@ export default function Dashboard() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <div>
-        <h1 className="text-xl font-bold text-neutral-900">Olá, {profile?.full_name?.split(' ')[0] || 'tudo bem'}</h1>
-        <p className="text-sm text-neutral-500">Objetivo: {goalLabel(profile?.goal)}</p>
+        <h1 className="text-2xl font-extrabold text-white tracking-tight">Olá, {profile?.full_name?.split(' ')[0] || 'tudo bem'}</h1>
+        <p className="text-sm text-brand-400 font-medium">Objetivo: {goalLabel(profile?.goal)}</p>
       </div>
 
-      <div className="card space-y-2">
-        <p className="text-sm font-medium text-neutral-700">Coach</p>
+      <div className="card space-y-2 border-brand-950 bg-gradient-to-br from-neutral-900 to-brand-950/40">
+        <p className="section-label flex items-center gap-1.5">
+          <Flame size={14} className="text-brand-400" />
+          Coach
+        </p>
         {tips.map((tip, i) => (
-          <p key={i} className="text-sm text-neutral-600">
+          <p key={i} className="text-sm text-neutral-300">
             • {tip}
           </p>
         ))}
@@ -101,40 +105,49 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="card">
-          <p className="text-xs text-neutral-400">Peso atual</p>
-          <p className="text-lg font-semibold text-neutral-900">{latestWeight ? `${latestWeight} kg` : '—'}</p>
+          <p className="text-xs text-neutral-500 flex items-center gap-1.5 mb-1">
+            <Scale size={14} />
+            Peso atual
+          </p>
+          <p className="text-2xl font-extrabold text-white">{latestWeight ? `${latestWeight} kg` : '—'}</p>
         </div>
         <div className="card">
-          <p className="text-xs text-neutral-400">Calorias hoje</p>
-          <p className="text-lg font-semibold text-neutral-900">
+          <p className="text-xs text-neutral-500 flex items-center gap-1.5 mb-1">
+            <Utensils size={14} />
+            Calorias hoje
+          </p>
+          <p className="text-2xl font-extrabold text-white">
             {Math.round(todayCalories)}
-            {targets ? ` / ${targets.calories}` : ''}
+            {targets ? <span className="text-sm text-neutral-500 font-medium"> / {targets.calories}</span> : ''}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        <Link to="/treinos" className="card text-center text-sm font-medium hover:border-neutral-400">
-          Registrar treino
+        <Link to="/treinos" className="card flex flex-col items-center gap-1.5 text-center text-xs font-semibold text-neutral-200 hover:border-brand-500 transition py-4">
+          <Dumbbell size={20} className="text-brand-400" />
+          Treino
         </Link>
-        <Link to="/medidas" className="card text-center text-sm font-medium hover:border-neutral-400">
-          Registrar medida
+        <Link to="/medidas" className="card flex flex-col items-center gap-1.5 text-center text-xs font-semibold text-neutral-200 hover:border-brand-500 transition py-4">
+          <Ruler size={20} className="text-brand-400" />
+          Medida
         </Link>
-        <Link to="/nutricao" className="card text-center text-sm font-medium hover:border-neutral-400">
-          Registrar refeição
+        <Link to="/nutricao" className="card flex flex-col items-center gap-1.5 text-center text-xs font-semibold text-neutral-200 hover:border-brand-500 transition py-4">
+          <Apple size={20} className="text-brand-400" />
+          Refeição
         </Link>
       </div>
 
       <div className="card">
-        <p className="text-sm font-medium text-neutral-700 mb-2">Últimos treinos</p>
+        <p className="section-label mb-2">Últimos treinos</p>
         {recentWorkouts.length === 0 ? (
-          <p className="text-xs text-neutral-400">Nenhum treino ainda.</p>
+          <p className="text-xs text-neutral-500">Nenhum treino ainda.</p>
         ) : (
           <div className="space-y-1">
             {recentWorkouts.map((w) => (
-              <Link key={w.id} to={`/treinos/${w.id}`} className="flex justify-between text-sm text-neutral-600 hover:text-neutral-900">
-                <span>{w.name || 'Treino'}</span>
-                <span className="text-neutral-400">{new Date(w.date + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
+              <Link key={w.id} to={`/treinos/${w.id}`} className="flex justify-between text-sm text-neutral-300 hover:text-white transition py-1">
+                <span className="font-medium">{w.name || 'Treino'}</span>
+                <span className="text-neutral-500">{new Date(w.date + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
               </Link>
             ))}
           </div>

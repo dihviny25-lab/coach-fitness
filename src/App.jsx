@@ -12,7 +12,7 @@ import Profile from './pages/Profile'
 
 function Shell({ children }) {
   return (
-    <div className="min-h-screen bg-neutral-50 pb-16 md:pb-0">
+    <div className="min-h-screen bg-neutral-950 pb-16 md:pb-0">
       <NavBar />
       {children}
     </div>
@@ -23,7 +23,7 @@ function Gate() {
   const { session, profile, profileLoading } = useAuth()
 
   if (session === undefined || (session && profileLoading)) {
-    return <div className="min-h-screen flex items-center justify-center text-neutral-400 text-sm">Carregando...</div>
+    return <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-neutral-400 text-sm">Carregando...</div>
   }
 
   if (!session) return <Login />

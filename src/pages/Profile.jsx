@@ -97,8 +97,8 @@ export default function Profile() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-neutral-900">Perfil</h1>
-        <button onClick={signOut} className="text-sm text-red-600">
+        <h1 className="page-title">Perfil</h1>
+        <button onClick={signOut} className="text-sm text-red-400 hover:text-red-300 transition">
           Sair da conta
         </button>
       </div>
@@ -152,8 +152,8 @@ export default function Profile() {
           </select>
         </Field>
 
-        <div className="border-t border-neutral-200 pt-3 mt-1">
-          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Alimentação</p>
+        <div className="border-t border-neutral-800 pt-3 mt-1">
+          <p className="section-label mb-3">Alimentação</p>
           <div className="space-y-3">
             <Field label="Padrão alimentar">
               <select className="input" value={form.dietary_pattern || 'sem_restricao'} onChange={(e) => update('dietary_pattern', e.target.value)}>
@@ -173,8 +173,8 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="border-t border-neutral-200 pt-3 mt-1">
-          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Rotina de treino</p>
+        <div className="border-t border-neutral-800 pt-3 mt-1">
+          <p className="section-label mb-3">Rotina de treino</p>
           <div className="space-y-3">
             <Field label="Onde você treina">
               <select className="input" value={form.training_location || 'academia'} onChange={(e) => update('training_location', e.target.value)}>
@@ -218,18 +218,18 @@ export default function Profile() {
         <button className="btn-primary" disabled={saving}>
           {saving ? 'Salvando...' : 'Salvar alterações'}
         </button>
-        {saved && <p className="text-green-700 text-sm">Perfil atualizado.</p>}
+        {saved && <p className="text-green-400 text-sm">Perfil atualizado.</p>}
       </form>
 
       <div className="card space-y-2">
-        <p className="text-sm font-medium text-neutral-700">Plano de treino</p>
+        <p className="section-label">Plano de treino</p>
         <p className="text-xs text-neutral-500">
           Gera um novo treino a partir do seu objetivo, nível, dias disponíveis e equipamentos — substitui o plano atual (o histórico de treinos já registrados não é afetado).
         </p>
         <button type="button" className="btn-secondary" disabled={regenerating} onClick={handleRegeneratePlan}>
           {regenerating ? 'Gerando...' : 'Gerar novo plano de treino'}
         </button>
-        {regenerated && <p className="text-green-700 text-sm">Novo plano gerado! Confira na aba Treino.</p>}
+        {regenerated && <p className="text-green-400 text-sm">Novo plano gerado! Confira na aba Treino.</p>}
       </div>
 
       <p className="text-xs text-neutral-400 text-center">
@@ -245,7 +245,7 @@ function Chip({ active, onClick, children }) {
       type="button"
       onClick={onClick}
       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-        active ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+        active ? 'bg-brand-500 text-white border-brand-500' : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-600'
       }`}
     >
       {children}
@@ -256,7 +256,7 @@ function Chip({ active, onClick, children }) {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="block text-xs font-medium text-neutral-600 mb-1">{label}</span>
+      <span className="block text-xs font-medium text-neutral-400 mb-1">{label}</span>
       {children}
     </label>
   )

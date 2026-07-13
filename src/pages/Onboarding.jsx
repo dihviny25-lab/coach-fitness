@@ -106,17 +106,17 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 px-4 py-8">
-      <div className="max-w-md mx-auto bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
+    <div className="min-h-screen bg-neutral-950 px-4 py-8">
+      <div className="max-w-md mx-auto card">
         <div className="flex items-center gap-1 mb-4">
           {[1, 2, 3].map((s) => (
-            <div key={s} className={`h-1 flex-1 rounded-full ${s <= step ? 'bg-neutral-900' : 'bg-neutral-200'}`} />
+            <div key={s} className={`h-1 flex-1 rounded-full ${s <= step ? 'bg-brand-500' : 'bg-neutral-800'}`} />
           ))}
         </div>
 
         {step === 1 && (
           <>
-            <h1 className="text-xl font-bold mb-1 text-neutral-900">Vamos te conhecer</h1>
+            <h1 className="text-xl font-extrabold mb-1 text-white uppercase tracking-tight">Vamos te conhecer</h1>
             <p className="text-sm text-neutral-500 mb-6">Isso ajuda a calcular suas metas de treino e nutrição.</p>
             <form onSubmit={nextStep} className="space-y-4">
               <Field label="Nome">
@@ -171,7 +171,7 @@ export default function Onboarding() {
                   <option value="muito_ativo">Muito ativo</option>
                 </select>
               </Field>
-              {error && <p className="text-red-600 text-sm">{error}</p>}
+              {error && <p className="text-red-400 text-sm">{error}</p>}
               <button className="btn-primary w-full">Próximo: alimentação</button>
             </form>
           </>
@@ -179,7 +179,7 @@ export default function Onboarding() {
 
         {step === 2 && (
           <>
-            <h1 className="text-xl font-bold mb-1 text-neutral-900">Sua alimentação</h1>
+            <h1 className="text-xl font-extrabold mb-1 text-white uppercase tracking-tight">Sua alimentação</h1>
             <p className="text-sm text-neutral-500 mb-6">Isso ajuda a personalizar as sugestões de nutrição.</p>
             <form onSubmit={nextStep} className="space-y-4">
               <Field label="Padrão alimentar">
@@ -203,7 +203,7 @@ export default function Onboarding() {
                   onChange={(e) => update('dietary_notes', e.target.value)}
                 />
               </Field>
-              {error && <p className="text-red-600 text-sm">{error}</p>}
+              {error && <p className="text-red-400 text-sm">{error}</p>}
               <div className="flex gap-3">
                 <button type="button" onClick={prevStep} className="btn-secondary flex-1">
                   Voltar
@@ -216,7 +216,7 @@ export default function Onboarding() {
 
         {step === 3 && (
           <>
-            <h1 className="text-xl font-bold mb-1 text-neutral-900">Sua rotina de treino</h1>
+            <h1 className="text-xl font-extrabold mb-1 text-white uppercase tracking-tight">Sua rotina de treino</h1>
             <p className="text-sm text-neutral-500 mb-6">Com isso a gente já monta seu treino automaticamente.</p>
             <form onSubmit={handleFinish} className="space-y-4">
               <Field label="Onde você treina">
@@ -268,7 +268,7 @@ export default function Onboarding() {
                 />
               </Field>
 
-              {error && <p className="text-red-600 text-sm">{error}</p>}
+              {error && <p className="text-red-400 text-sm">{error}</p>}
               <div className="flex gap-3">
                 <button type="button" onClick={prevStep} className="btn-secondary flex-1" disabled={loading}>
                   Voltar
@@ -288,7 +288,7 @@ export default function Onboarding() {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="block text-xs font-medium text-neutral-600 mb-1">{label}</span>
+      <span className="block text-xs font-medium text-neutral-400 mb-1">{label}</span>
       {children}
     </label>
   )
@@ -300,7 +300,7 @@ function Chip({ active, onClick, children }) {
       type="button"
       onClick={onClick}
       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-        active ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+        active ? 'bg-brand-500 text-white border-brand-500' : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-600'
       }`}
     >
       {children}

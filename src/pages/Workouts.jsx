@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Dumbbell, Plus, Play, ListChecks } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { loadActivePlan } from '../lib/plan'
@@ -68,33 +69,43 @@ export default function Workouts() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-neutral-900">Treinos</h1>
-        <button className="btn-primary" onClick={() => setShowForm((v) => !v)}>
-          + Novo treino
+        <h1 className="page-title flex items-center gap-2">
+          <Dumbbell className="text-brand-500" size={22} />
+          Treinos
+        </h1>
+        <button className="btn-primary flex items-center gap-1.5" onClick={() => setShowForm((v) => !v)}>
+          <Plus size={16} />
+          Novo treino
         </button>
       </div>
 
       {!planLoading && plan && (
         <div className="card space-y-3">
-          <div>
-            <p className="text-sm font-medium text-neutral-700">Seu plano de treino</p>
-            <p className="text-xs text-neutral-400">{plan.split_type}</p>
+          <div className="flex items-center gap-1.5">
+            <ListChecks size={14} className="text-brand-400" />
+            <div>
+              <p className="section-label">Seu plano de treino</p>
+              <p className="text-xs text-neutral-500">{plan.split_type}</p>
+            </div>
           </div>
           <div className="space-y-2">
             {plan.workout_plan_days.map((day) => (
-              <div key={day.id} className="border border-neutral-200 rounded-xl p-3">
+              <div key={day.id} className="border border-neutral-800 bg-neutral-950/60 rounded-xl p-3">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="font-medium text-neutral-900 text-sm">
+                  <p className="font-semibold text-white text-sm">
                     {day.name}
-                    {day.weekday && <span className="text-neutral-400 font-normal"> · {WEEKDAY_LABELS[day.weekday]}</span>}
+                    {day.weekday && <span className="text-neutral-500 font-normal"> · {WEEKDAY_LABELS[day.weekday]}</span>}
                   </p>
-                  <button className="btn-secondary text-xs py-1 px-2" disabled={startingDayId === day.id} onClick={() => startPlanDay(day)}>
-                    {startingDayId === day.id ? 'Criando...' : 'Iniciar treino'}
+                  <button
+                    className="btn-primary text-xs py-1 px-2 flex items-center gap-1"
+                    disabled={startingDayId === day.id}
+                    onClick={() => startPlanDay(day)}
+                  >
+                    <Play size={12} />
+                    {startingDayId === day.id ? 'Criando...' : 'Iniciar'}
                   </button>
                 </div>
-                <p className="text-xs text-neutral-500">
-                  {day.workout_plan_exercises.map((pe) => pe.exercises?.name).join(', ')}
-                </p>
+                <p className="text-xs text-neutral-500">{day.workout_plan_exercises.map((pe) => pe.exercises?.name).join(', ')}</p>
               </div>
             ))}
           </div>
@@ -120,16 +131,12 @@ export default function Workouts() {
       ) : (
         <div className="space-y-2">
           {workouts.map((w) => (
-            <Link
-              key={w.id}
-              to={`/treinos/${w.id}`}
-              className="card flex items-center justify-between hover:border-neutral-400 transition"
-            >
+            <Link key={w.id} to={`/treinos/${w.id}`} className="card flex items-center justify-between hover:border-brand-500 transition">
               <div>
-                <p className="font-medium text-neutral-900">{w.name || 'Treino'}</p>
+                <p className="font-semibold text-white">{w.name || 'Treino'}</p>
                 <p className="text-xs text-neutral-500">{new Date(w.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
               </div>
-              <span className="text-sm text-neutral-500">{w.workout_sets?.length || 0} séries</span>
+              <span className="text-sm text-brand-400 font-semibold">{w.workout_sets?.length || 0} séries</span>
             </Link>
           ))}
         </div>
