@@ -2,21 +2,47 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { goalLabel } from '../lib/coach'
+import { createWorkoutPlan } from '../lib/plan'
+import { EQUIPMENT_OPTIONS, WEEKDAY_LABELS, DIETARY_PATTERNS } from '../lib/planGenerator'
+
+const WEEKDAY_KEYS = Object.keys(WEEKDAY_LABELS)
 
 export default function Profile() {
   const { user, profile, refreshProfile, signOut } = useAuth()
   const [form, setForm] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
+  const [regenerated, setRegenerated] = useState(false)
 
   useEffect(() => {
-    if (profile) setForm(profile)
+    if (profile) {
+      setForm({
+        equipment_access: [],
+        available_days: [],
+        dietary_pattern: 'sem_restricao',
+        meals_per_day: 4,
+        training_location: 'academia',
+        session_duration_min: 60,
+        ...profile,
+      })
+    }
   }, [profile])
 
   if (!form) return null
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }))
+    setSaved(false)
+  }
+
+  function toggleInArray(field, value) {
+    setForm((f) => {
+      const set = new Set(f[field] || [])
+      if (set.has(value)) set.delete(value)
+      else set.add(value)
+      return { ...f, [field]: Array.from(set) }
+    })
     setSaved(false)
   }
 
@@ -34,6 +60,13 @@ export default function Profile() {
         experience_level: form.experience_level,
         weekly_frequency: form.weekly_frequency ? Number(form.weekly_frequency) : null,
         activity_level: form.activity_level,
+        dietary_pattern: form.dietary_pattern,
+        dietary_notes: form.dietary_notes,
+        meals_per_day: form.meals_per_day ? Number(form.meals_per_day) : null,
+        training_location: form.training_location,
+        equipment_access: form.equipment_access,
+        available_days: form.available_days,
+        session_duration_min: form.session_duration_min ? Number(form.session_duration_min) : null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', user.id)
@@ -41,6 +74,23 @@ export default function Profile() {
     if (!error) {
       setSaved(true)
       refreshProfile()
+    }
+  }
+
+  async function handleRegeneratePlan() {
+    setRegenerating(true)
+    setRegenerated(false)
+    try {
+      await createWorkoutPlan(user.id, {
+        goal: form.goal,
+        experienceLevel: form.experience_level,
+        weeklyFrequency: form.weekly_frequency,
+        equipmentAccess: form.equipment_access,
+        availableDays: form.available_days,
+      })
+      setRegenerated(true)
+    } finally {
+      setRegenerating(false)
     }
   }
 
@@ -102,16 +152,104 @@ export default function Profile() {
           </select>
         </Field>
 
+        <div className="border-t border-neutral-200 pt-3 mt-1">
+          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Alimentação</p>
+          <div className="space-y-3">
+            <Field label="Padrão alimentar">
+              <select className="input" value={form.dietary_pattern || 'sem_restricao'} onChange={(e) => update('dietary_pattern', e.target.value)}>
+                {Object.entries(DIETARY_PATTERNS).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Refeições por dia">
+              <input type="number" min="1" max="8" className="input" value={form.meals_per_day || ''} onChange={(e) => update('meals_per_day', e.target.value)} />
+            </Field>
+            <Field label="Restrições, alergias ou preferências">
+              <textarea className="input" rows={3} value={form.dietary_notes || ''} onChange={(e) => update('dietary_notes', e.target.value)} />
+            </Field>
+          </div>
+        </div>
+
+        <div className="border-t border-neutral-200 pt-3 mt-1">
+          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Rotina de treino</p>
+          <div className="space-y-3">
+            <Field label="Onde você treina">
+              <select className="input" value={form.training_location || 'academia'} onChange={(e) => update('training_location', e.target.value)}>
+                <option value="academia">Academia</option>
+                <option value="casa">Casa</option>
+                <option value="ar_livre">Ar livre</option>
+              </select>
+            </Field>
+            <Field label="Equipamentos disponíveis">
+              <div className="flex flex-wrap gap-2">
+                {EQUIPMENT_OPTIONS.map((eq) => (
+                  <Chip key={eq} active={(form.equipment_access || []).includes(eq)} onClick={() => toggleInArray('equipment_access', eq)}>
+                    {eq}
+                  </Chip>
+                ))}
+              </div>
+            </Field>
+            <Field label="Dias que você pode treinar">
+              <div className="flex flex-wrap gap-2">
+                {WEEKDAY_KEYS.map((day) => (
+                  <Chip key={day} active={(form.available_days || []).includes(day)} onClick={() => toggleInArray('available_days', day)}>
+                    {WEEKDAY_LABELS[day]}
+                  </Chip>
+                ))}
+              </div>
+            </Field>
+            <Field label="Tempo disponível por treino (minutos)">
+              <input
+                type="number"
+                min="15"
+                max="180"
+                step="5"
+                className="input"
+                value={form.session_duration_min || ''}
+                onChange={(e) => update('session_duration_min', e.target.value)}
+              />
+            </Field>
+          </div>
+        </div>
+
         <button className="btn-primary" disabled={saving}>
           {saving ? 'Salvando...' : 'Salvar alterações'}
         </button>
         {saved && <p className="text-green-700 text-sm">Perfil atualizado.</p>}
       </form>
 
+      <div className="card space-y-2">
+        <p className="text-sm font-medium text-neutral-700">Plano de treino</p>
+        <p className="text-xs text-neutral-500">
+          Gera um novo treino a partir do seu objetivo, nível, dias disponíveis e equipamentos — substitui o plano atual (o histórico de treinos já registrados não é afetado).
+        </p>
+        <button type="button" className="btn-secondary" disabled={regenerating} onClick={handleRegeneratePlan}>
+          {regenerating ? 'Gerando...' : 'Gerar novo plano de treino'}
+        </button>
+        {regenerated && <p className="text-green-700 text-sm">Novo plano gerado! Confira na aba Treino.</p>}
+      </div>
+
       <p className="text-xs text-neutral-400 text-center">
         Objetivo atual: {goalLabel(form.goal)} · {user.email}
       </p>
     </div>
+  )
+}
+
+function Chip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+        active ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+      }`}
+    >
+      {children}
+    </button>
   )
 }
 

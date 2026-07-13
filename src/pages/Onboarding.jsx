@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { createWorkoutPlan } from '../lib/plan'
+import { EQUIPMENT_OPTIONS, WEEKDAY_LABELS, DIETARY_PATTERNS } from '../lib/planGenerator'
+
+const WEEKDAY_KEYS = Object.keys(WEEKDAY_LABELS)
 
 export default function Onboarding() {
   const { user, refreshProfile } = useAuth()
+  const [step, setStep] = useState(1)
   const [form, setForm] = useState({
     full_name: '',
     sex: 'masculino',
@@ -14,6 +19,13 @@ export default function Onboarding() {
     experience_level: 'iniciante',
     weekly_frequency: 3,
     activity_level: 'leve',
+    dietary_pattern: 'sem_restricao',
+    dietary_notes: '',
+    meals_per_day: 4,
+    training_location: 'academia',
+    equipment_access: [...EQUIPMENT_OPTIONS],
+    available_days: ['seg', 'qua', 'sex'],
+    session_duration_min: 60,
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -22,7 +34,27 @@ export default function Onboarding() {
     setForm((f) => ({ ...f, [field]: value }))
   }
 
-  async function handleSubmit(e) {
+  function toggleInArray(field, value) {
+    setForm((f) => {
+      const set = new Set(f[field])
+      if (set.has(value)) set.delete(value)
+      else set.add(value)
+      return { ...f, [field]: Array.from(set) }
+    })
+  }
+
+  function nextStep(e) {
+    e.preventDefault()
+    setError('')
+    setStep((s) => s + 1)
+  }
+
+  function prevStep() {
+    setError('')
+    setStep((s) => s - 1)
+  }
+
+  async function handleFinish(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
@@ -38,6 +70,13 @@ export default function Onboarding() {
           experience_level: form.experience_level,
           weekly_frequency: Number(form.weekly_frequency),
           activity_level: form.activity_level,
+          dietary_pattern: form.dietary_pattern,
+          dietary_notes: form.dietary_notes,
+          meals_per_day: Number(form.meals_per_day),
+          training_location: form.training_location,
+          equipment_access: form.equipment_access,
+          available_days: form.available_days,
+          session_duration_min: Number(form.session_duration_min),
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id)
@@ -51,10 +90,17 @@ export default function Onboarding() {
         if (mErr) throw mErr
       }
 
+      await createWorkoutPlan(user.id, {
+        goal: form.goal,
+        experienceLevel: form.experience_level,
+        weeklyFrequency: form.weekly_frequency,
+        equipmentAccess: form.equipment_access,
+        availableDays: form.available_days,
+      })
+
       await refreshProfile()
     } catch (err) {
       setError(err.message)
-    } finally {
       setLoading(false)
     }
   }
@@ -62,74 +108,178 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-neutral-50 px-4 py-8">
       <div className="max-w-md mx-auto bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
-        <h1 className="text-xl font-bold mb-1 text-neutral-900">Vamos te conhecer</h1>
-        <p className="text-sm text-neutral-500 mb-6">Isso ajuda a calcular suas metas de treino e nutrição.</p>
+        <div className="flex items-center gap-1 mb-4">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className={`h-1 flex-1 rounded-full ${s <= step ? 'bg-neutral-900' : 'bg-neutral-200'}`} />
+          ))}
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Nome">
-            <input className="input" value={form.full_name} onChange={(e) => update('full_name', e.target.value)} required />
-          </Field>
+        {step === 1 && (
+          <>
+            <h1 className="text-xl font-bold mb-1 text-neutral-900">Vamos te conhecer</h1>
+            <p className="text-sm text-neutral-500 mb-6">Isso ajuda a calcular suas metas de treino e nutrição.</p>
+            <form onSubmit={nextStep} className="space-y-4">
+              <Field label="Nome">
+                <input className="input" value={form.full_name} onChange={(e) => update('full_name', e.target.value)} required />
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Sexo biológico">
+                  <select className="input" value={form.sex} onChange={(e) => update('sex', e.target.value)}>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
+                  </select>
+                </Field>
+                <Field label="Data de nascimento">
+                  <input type="date" className="input" value={form.birth_date} onChange={(e) => update('birth_date', e.target.value)} required />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Altura (cm)">
+                  <input type="number" className="input" value={form.height_cm} onChange={(e) => update('height_cm', e.target.value)} required />
+                </Field>
+                <Field label="Peso atual (kg)">
+                  <input type="number" step="0.1" className="input" value={form.weight_kg} onChange={(e) => update('weight_kg', e.target.value)} required />
+                </Field>
+              </div>
+              <Field label="Objetivo principal">
+                <select className="input" value={form.goal} onChange={(e) => update('goal', e.target.value)}>
+                  <option value="emagrecimento">Emagrecimento</option>
+                  <option value="ganho_massa">Ganho de massa</option>
+                  <option value="forca">Força</option>
+                  <option value="recomposicao">Recomposição corporal</option>
+                  <option value="saude_geral">Saúde geral</option>
+                </select>
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Nível">
+                  <select className="input" value={form.experience_level} onChange={(e) => update('experience_level', e.target.value)}>
+                    <option value="iniciante">Iniciante</option>
+                    <option value="intermediario">Intermediário</option>
+                    <option value="avancado">Avançado</option>
+                  </select>
+                </Field>
+                <Field label="Treinos por semana">
+                  <input type="number" min="1" max="7" className="input" value={form.weekly_frequency} onChange={(e) => update('weekly_frequency', e.target.value)} />
+                </Field>
+              </div>
+              <Field label="Nível de atividade no dia a dia">
+                <select className="input" value={form.activity_level} onChange={(e) => update('activity_level', e.target.value)}>
+                  <option value="sedentario">Sedentário (trabalho parado)</option>
+                  <option value="leve">Leve (em pé às vezes)</option>
+                  <option value="moderado">Moderado</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="muito_ativo">Muito ativo</option>
+                </select>
+              </Field>
+              {error && <p className="text-red-600 text-sm">{error}</p>}
+              <button className="btn-primary w-full">Próximo: alimentação</button>
+            </form>
+          </>
+        )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Sexo biológico">
-              <select className="input" value={form.sex} onChange={(e) => update('sex', e.target.value)}>
-                <option value="masculino">Masculino</option>
-                <option value="feminino">Feminino</option>
-              </select>
-            </Field>
-            <Field label="Data de nascimento">
-              <input type="date" className="input" value={form.birth_date} onChange={(e) => update('birth_date', e.target.value)} required />
-            </Field>
-          </div>
+        {step === 2 && (
+          <>
+            <h1 className="text-xl font-bold mb-1 text-neutral-900">Sua alimentação</h1>
+            <p className="text-sm text-neutral-500 mb-6">Isso ajuda a personalizar as sugestões de nutrição.</p>
+            <form onSubmit={nextStep} className="space-y-4">
+              <Field label="Padrão alimentar">
+                <select className="input" value={form.dietary_pattern} onChange={(e) => update('dietary_pattern', e.target.value)}>
+                  {Object.entries(DIETARY_PATTERNS).map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Refeições por dia">
+                <input type="number" min="1" max="8" className="input" value={form.meals_per_day} onChange={(e) => update('meals_per_day', e.target.value)} />
+              </Field>
+              <Field label="Restrições, alergias ou preferências (opcional)">
+                <textarea
+                  className="input"
+                  rows={3}
+                  placeholder="Ex: intolerância a lactose, não gosto de peixe..."
+                  value={form.dietary_notes}
+                  onChange={(e) => update('dietary_notes', e.target.value)}
+                />
+              </Field>
+              {error && <p className="text-red-600 text-sm">{error}</p>}
+              <div className="flex gap-3">
+                <button type="button" onClick={prevStep} className="btn-secondary flex-1">
+                  Voltar
+                </button>
+                <button className="btn-primary flex-1">Próximo: rotina</button>
+              </div>
+            </form>
+          </>
+        )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Altura (cm)">
-              <input type="number" className="input" value={form.height_cm} onChange={(e) => update('height_cm', e.target.value)} required />
-            </Field>
-            <Field label="Peso atual (kg)">
-              <input type="number" step="0.1" className="input" value={form.weight_kg} onChange={(e) => update('weight_kg', e.target.value)} required />
-            </Field>
-          </div>
+        {step === 3 && (
+          <>
+            <h1 className="text-xl font-bold mb-1 text-neutral-900">Sua rotina de treino</h1>
+            <p className="text-sm text-neutral-500 mb-6">Com isso a gente já monta seu treino automaticamente.</p>
+            <form onSubmit={handleFinish} className="space-y-4">
+              <Field label="Onde você treina">
+                <select
+                  className="input"
+                  value={form.training_location}
+                  onChange={(e) => {
+                    const loc = e.target.value
+                    update('training_location', loc)
+                    if (loc === 'academia') update('equipment_access', [...EQUIPMENT_OPTIONS])
+                    else update('equipment_access', ['Peso corporal'])
+                  }}
+                >
+                  <option value="academia">Academia</option>
+                  <option value="casa">Casa</option>
+                  <option value="ar_livre">Ar livre</option>
+                </select>
+              </Field>
 
-          <Field label="Objetivo principal">
-            <select className="input" value={form.goal} onChange={(e) => update('goal', e.target.value)}>
-              <option value="emagrecimento">Emagrecimento</option>
-              <option value="ganho_massa">Ganho de massa</option>
-              <option value="forca">Força</option>
-              <option value="recomposicao">Recomposição corporal</option>
-              <option value="saude_geral">Saúde geral</option>
-            </select>
-          </Field>
+              <Field label="Equipamentos disponíveis">
+                <div className="flex flex-wrap gap-2">
+                  {EQUIPMENT_OPTIONS.map((eq) => (
+                    <Chip key={eq} active={form.equipment_access.includes(eq)} onClick={() => toggleInArray('equipment_access', eq)}>
+                      {eq}
+                    </Chip>
+                  ))}
+                </div>
+              </Field>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Nível">
-              <select className="input" value={form.experience_level} onChange={(e) => update('experience_level', e.target.value)}>
-                <option value="iniciante">Iniciante</option>
-                <option value="intermediario">Intermediário</option>
-                <option value="avancado">Avançado</option>
-              </select>
-            </Field>
-            <Field label="Treinos por semana">
-              <input type="number" min="1" max="7" className="input" value={form.weekly_frequency} onChange={(e) => update('weekly_frequency', e.target.value)} />
-            </Field>
-          </div>
+              <Field label="Dias que você pode treinar">
+                <div className="flex flex-wrap gap-2">
+                  {WEEKDAY_KEYS.map((day) => (
+                    <Chip key={day} active={form.available_days.includes(day)} onClick={() => toggleInArray('available_days', day)}>
+                      {WEEKDAY_LABELS[day]}
+                    </Chip>
+                  ))}
+                </div>
+              </Field>
 
-          <Field label="Nível de atividade no dia a dia">
-            <select className="input" value={form.activity_level} onChange={(e) => update('activity_level', e.target.value)}>
-              <option value="sedentario">Sedentário (trabalho parado)</option>
-              <option value="leve">Leve (em pé às vezes)</option>
-              <option value="moderado">Moderado</option>
-              <option value="ativo">Ativo</option>
-              <option value="muito_ativo">Muito ativo</option>
-            </select>
-          </Field>
+              <Field label="Tempo disponível por treino (minutos)">
+                <input
+                  type="number"
+                  min="15"
+                  max="180"
+                  step="5"
+                  className="input"
+                  value={form.session_duration_min}
+                  onChange={(e) => update('session_duration_min', e.target.value)}
+                />
+              </Field>
 
-          {error && <p className="text-red-600 text-sm">{error}</p>}
-
-          <button className="w-full bg-neutral-900 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50" disabled={loading}>
-            {loading ? 'Salvando...' : 'Começar'}
-          </button>
-        </form>
+              {error && <p className="text-red-600 text-sm">{error}</p>}
+              <div className="flex gap-3">
+                <button type="button" onClick={prevStep} className="btn-secondary flex-1" disabled={loading}>
+                  Voltar
+                </button>
+                <button className="btn-primary flex-1" disabled={loading}>
+                  {loading ? 'Montando seu treino...' : 'Criar meu treino'}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   )
@@ -141,5 +291,19 @@ function Field({ label, children }) {
       <span className="block text-xs font-medium text-neutral-600 mb-1">{label}</span>
       {children}
     </label>
+  )
+}
+
+function Chip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+        active ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+      }`}
+    >
+      {children}
+    </button>
   )
 }

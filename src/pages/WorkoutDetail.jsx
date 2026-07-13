@@ -8,6 +8,7 @@ export default function WorkoutDetail() {
   const [workout, setWorkout] = useState(null)
   const [sets, setSets] = useState([])
   const [exercises, setExercises] = useState([])
+  const [planExercises, setPlanExercises] = useState([])
   const [exerciseId, setExerciseId] = useState('')
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
@@ -26,6 +27,14 @@ export default function WorkoutDetail() {
     if (exercises.length === 0) {
       const { data: ex } = await supabase.from('exercises').select('id, name, muscle_group').order('name')
       setExercises(ex || [])
+    }
+    if (w?.plan_day_id) {
+      const { data: pe } = await supabase
+        .from('workout_plan_exercises')
+        .select('*, exercises(name, muscle_group)')
+        .eq('plan_day_id', w.plan_day_id)
+        .order('order_index', { ascending: true })
+      setPlanExercises(pe || [])
     }
   }
 
@@ -92,6 +101,34 @@ export default function WorkoutDetail() {
           Excluir treino
         </button>
       </div>
+
+      {planExercises.length > 0 && (
+        <div className="card space-y-2">
+          <p className="text-sm font-medium text-neutral-700">Sugestão do plano</p>
+          <div className="flex flex-wrap gap-2">
+            {planExercises.map((pe) => {
+              const done = sets.filter((s) => s.exercise_id === pe.exercise_id).length
+              const complete = pe.target_sets && done >= pe.target_sets
+              return (
+                <button
+                  key={pe.id}
+                  type="button"
+                  onClick={() => setExerciseId(pe.exercise_id)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                    complete
+                      ? 'bg-green-50 text-green-700 border-green-200'
+                      : exerciseId === pe.exercise_id
+                        ? 'bg-neutral-900 text-white border-neutral-900'
+                        : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+                  }`}
+                >
+                  {pe.exercises?.name} · {done}/{pe.target_sets ?? '-'} × {pe.target_reps}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <form onSubmit={addSet} className="card space-y-3">
         <p className="text-sm font-medium text-neutral-700">Registrar série</p>
