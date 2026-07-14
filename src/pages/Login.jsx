@@ -58,7 +58,7 @@ export default function Login() {
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-4">
           <div className="w-14 h-14 rounded-2xl bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-950/60">
-            <Dumbbell size={28} className="text-white" />
+            <Dumbbell size={28} className="text-neutral-950" />
           </div>
         </div>
         <h1 className="text-2xl font-extrabold text-center mb-1 text-white uppercase tracking-tight">Coach Fitness</h1>
@@ -83,14 +83,14 @@ export default function Login() {
 
           <div className="flex mb-6 rounded-lg bg-neutral-950 border border-neutral-800 p-1 text-sm font-medium">
             <button
-              className={`flex-1 py-1.5 rounded-md transition ${mode === 'login' ? 'bg-brand-500 text-white' : 'text-neutral-500'}`}
+              className={`flex-1 py-1.5 rounded-md transition ${mode === 'login' ? 'bg-brand-500 text-neutral-950' : 'text-neutral-500'}`}
               onClick={() => setMode('login')}
               type="button"
             >
               Entrar
             </button>
             <button
-              className={`flex-1 py-1.5 rounded-md transition ${mode === 'signup' ? 'bg-brand-500 text-white' : 'text-neutral-500'}`}
+              className={`flex-1 py-1.5 rounded-md transition ${mode === 'signup' ? 'bg-brand-500 text-neutral-950' : 'text-neutral-500'}`}
               onClick={() => setMode('signup')}
               type="button"
             >

@@ -257,7 +257,7 @@ function Chip({ active, onClick, children }) {
       type="button"
       onClick={onClick}
       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-        active ? 'bg-brand-500 text-white border-brand-500' : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-600'
+        active ? 'bg-brand-500 text-neutral-950 border-brand-500' : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-600'
       }`}
     >
       {children}

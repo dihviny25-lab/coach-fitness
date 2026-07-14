@@ -24,8 +24,8 @@ export default defineConfig(({ command }) => {
           name: 'Coach Fitness',
           short_name: 'Coach Fitness',
           description: 'Treino, medidas e nutrição em um só lugar',
-          theme_color: '#7e14ff',
-          background_color: '#fafafa',
+          theme_color: '#22dd0a',
+          background_color: '#0a0a0b',
           display: 'standalone',
           orientation: 'portrait',
           icons: [

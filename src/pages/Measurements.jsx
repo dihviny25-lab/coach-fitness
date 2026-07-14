@@ -94,7 +94,7 @@ export default function Measurements() {
               <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#a3a3a3' }} stroke="#404040" />
               <YAxis domain={['auto', 'auto']} tick={{ fontSize: 11, fill: '#a3a3a3' }} stroke="#404040" width={35} />
               <Tooltip contentStyle={{ background: '#171717', border: '1px solid #404040', borderRadius: 8, fontSize: 12, color: '#fff' }} />
-              <Line type="monotone" dataKey="peso" stroke="#aa3bff" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="peso" stroke="#39ff14" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>

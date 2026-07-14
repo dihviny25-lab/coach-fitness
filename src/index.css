@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #f4ecff;
-  --color-brand-200: #d9b8ff;
-  --color-brand-400: #aa3bff;
-  --color-brand-500: #7e14ff;
-  --color-brand-600: #6a0fe0;
-  --color-brand-950: #1c0640;
+  --color-brand-50: #eafff0;
+  --color-brand-200: #97ffbb;
+  --color-brand-400: #39ff14;
+  --color-brand-500: #22dd0a;
+  --color-brand-600: #16b000;
+  --color-brand-950: #062b0a;
 }
 
 :root {
@@ -30,7 +30,7 @@ body {
     @apply bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-lg shadow-black/20;
   }
   .btn-primary {
-    @apply bg-brand-500 hover:bg-brand-600 text-white rounded-lg py-2 px-4 text-sm font-semibold tracking-wide disabled:opacity-50 transition shadow-md shadow-brand-950/40;
+    @apply bg-brand-500 hover:bg-brand-600 text-neutral-950 rounded-lg py-2 px-4 text-sm font-semibold tracking-wide disabled:opacity-50 transition shadow-md shadow-brand-950/40;
   }
   .btn-secondary {
     @apply bg-neutral-800 hover:bg-neutral-700 text-neutral-100 rounded-lg py-2 px-4 text-sm font-medium disabled:opacity-50 transition;

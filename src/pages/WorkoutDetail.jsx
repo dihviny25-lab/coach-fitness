@@ -185,7 +185,7 @@ export default function WorkoutDetail() {
                       complete
                         ? 'bg-green-500/10 text-green-400 border-green-500/30'
                         : exerciseId === pe.exercise_id
-                          ? 'bg-brand-500 text-white border-brand-500'
+                          ? 'bg-brand-500 text-neutral-950 border-brand-500'
                           : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-600'
                     }`}
                   >
