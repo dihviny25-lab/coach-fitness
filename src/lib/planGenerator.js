@@ -13,12 +13,26 @@ const REP_SCHEME = {
 
 const EXERCISES_PER_DAY = { iniciante: 4, intermediario: 5, avancado: 6 }
 
+const FULL_BODY_VARIANTS = [
+  { letter: 'A', groups: ['Pernas', 'Peito', 'Costas', 'Ombro', 'Abdômen'] },
+  { letter: 'B', groups: ['Costas', 'Pernas', 'Peito', 'Bíceps', 'Tríceps'] },
+  { letter: 'C', groups: ['Pernas', 'Ombro', 'Costas', 'Abdômen', 'Posterior de coxa'] },
+  { letter: 'D', groups: ['Peito', 'Pernas', 'Ombro', 'Tríceps', 'Panturrilha'] },
+  { letter: 'E', groups: ['Costas', 'Peito', 'Pernas', 'Bíceps', 'Abdômen'] },
+  { letter: 'F', groups: ['Ombro', 'Costas', 'Pernas', 'Posterior de coxa', 'Tríceps'] },
+]
+
 function fullBodyTemplate() {
-  return [
-    { name: 'Treino A – Corpo inteiro', groups: ['Pernas', 'Peito', 'Costas', 'Ombro', 'Abdômen'] },
-    { name: 'Treino B – Corpo inteiro', groups: ['Costas', 'Pernas', 'Peito', 'Bíceps', 'Tríceps'] },
-    { name: 'Treino C – Corpo inteiro', groups: ['Pernas', 'Ombro', 'Costas', 'Abdômen', 'Posterior de coxa'] },
-  ]
+  return FULL_BODY_VARIANTS.slice(0, 3).map((v) => ({ name: `Treino ${v.letter} – Corpo inteiro`, groups: v.groups }))
+}
+
+// Um dia de corpo inteiro por treino, com variações leves na ordem/ênfase
+// dos grupos musculares entre os dias (em vez de dividir por partes do corpo).
+function fullBodyDailyTemplate(count) {
+  return Array.from({ length: count }, (_, i) => {
+    const v = FULL_BODY_VARIANTS[i % FULL_BODY_VARIANTS.length]
+    return { name: `Treino ${v.letter} – Corpo inteiro`, groups: v.groups }
+  })
 }
 
 function pushPullLegsTemplate() {
@@ -36,8 +50,12 @@ function upperLowerTemplate() {
   ]
 }
 
-function buildSplit(weeklyFrequency, experienceLevel) {
+function buildSplit(weeklyFrequency, experienceLevel, splitPreference) {
   const freq = Math.min(Math.max(Number(weeklyFrequency) || 3, 1), 7)
+
+  if (splitPreference === 'full_body') {
+    return { splitType: 'Full Body diário', days: fullBodyDailyTemplate(freq) }
+  }
 
   if (freq === 1) return { splitType: 'Full Body', days: [fullBodyTemplate()[0]] }
   if (freq === 2) return { splitType: 'Superior/Inferior', days: upperLowerTemplate() }
@@ -88,7 +106,7 @@ function groupBy(list, key) {
   return map
 }
 
-export function generateWorkoutPlan({ goal, experienceLevel, weeklyFrequency, equipmentAccess, availableDays }, exercisesLibrary) {
+export function generateWorkoutPlan({ goal, experienceLevel, weeklyFrequency, equipmentAccess, availableDays, splitPreference }, exercisesLibrary) {
   const allowedEquip = new Set([...(equipmentAccess || []), 'Peso corporal', 'Nenhum'])
   const pool = exercisesLibrary.filter((e) => allowedEquip.has(e.equipment) && e.muscle_group !== 'Cardio')
   const cardioPool = exercisesLibrary.filter((e) => e.muscle_group === 'Cardio' && allowedEquip.has(e.equipment))
@@ -97,7 +115,7 @@ export function generateWorkoutPlan({ goal, experienceLevel, weeklyFrequency, eq
   const { sets, reps } = REP_SCHEME[goal] || REP_SCHEME.saude_geral
   const exercisesPerDay = EXERCISES_PER_DAY[experienceLevel] || 5
 
-  const { splitType, days: template } = buildSplit(weeklyFrequency, experienceLevel)
+  const { splitType, days: template } = buildSplit(weeklyFrequency, experienceLevel, splitPreference)
 
   const days = template.map((day, dayIndex) => {
     const groups = day.groups || []
@@ -167,6 +185,11 @@ export const WEEKDAY_LABELS = {
 }
 
 export const EQUIPMENT_OPTIONS = ['Peso corporal', 'Halteres', 'Barra', 'Máquina', 'Cabo']
+
+export const SPLIT_PREFERENCES = {
+  automatico: 'Automático (recomendado)',
+  full_body: 'Full body todos os dias',
+}
 
 export const DIETARY_PATTERNS = {
   sem_restricao: 'Sem restrição',

@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { goalLabel } from '../lib/coach'
 import { createWorkoutPlan } from '../lib/plan'
-import { EQUIPMENT_OPTIONS, WEEKDAY_LABELS, DIETARY_PATTERNS } from '../lib/planGenerator'
+import { EQUIPMENT_OPTIONS, WEEKDAY_LABELS, DIETARY_PATTERNS, SPLIT_PREFERENCES } from '../lib/planGenerator'
 
 const WEEKDAY_KEYS = Object.keys(WEEKDAY_LABELS)
 
@@ -24,6 +24,7 @@ export default function Profile() {
         meals_per_day: 4,
         training_location: 'academia',
         session_duration_min: 60,
+        split_preference: 'automatico',
         ...profile,
       })
     }
@@ -67,6 +68,7 @@ export default function Profile() {
         equipment_access: form.equipment_access,
         available_days: form.available_days,
         session_duration_min: form.session_duration_min ? Number(form.session_duration_min) : null,
+        split_preference: form.split_preference,
         updated_at: new Date().toISOString(),
       })
       .eq('id', user.id)
@@ -87,6 +89,7 @@ export default function Profile() {
         weeklyFrequency: form.weekly_frequency,
         equipmentAccess: form.equipment_access,
         availableDays: form.available_days,
+        splitPreference: form.split_preference,
       })
       setRegenerated(true)
     } finally {
@@ -211,6 +214,15 @@ export default function Profile() {
                 value={form.session_duration_min || ''}
                 onChange={(e) => update('session_duration_min', e.target.value)}
               />
+            </Field>
+            <Field label="Tipo de divisão do treino">
+              <select className="input" value={form.split_preference || 'automatico'} onChange={(e) => update('split_preference', e.target.value)}>
+                {Object.entries(SPLIT_PREFERENCES).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </select>
             </Field>
           </div>
         </div>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { createWorkoutPlan } from '../lib/plan'
-import { EQUIPMENT_OPTIONS, WEEKDAY_LABELS, DIETARY_PATTERNS } from '../lib/planGenerator'
+import { EQUIPMENT_OPTIONS, WEEKDAY_LABELS, DIETARY_PATTERNS, SPLIT_PREFERENCES } from '../lib/planGenerator'
 
 const WEEKDAY_KEYS = Object.keys(WEEKDAY_LABELS)
 
@@ -26,6 +26,7 @@ export default function Onboarding() {
     equipment_access: [...EQUIPMENT_OPTIONS],
     available_days: ['seg', 'qua', 'sex'],
     session_duration_min: 60,
+    split_preference: 'automatico',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -77,6 +78,7 @@ export default function Onboarding() {
           equipment_access: form.equipment_access,
           available_days: form.available_days,
           session_duration_min: Number(form.session_duration_min),
+          split_preference: form.split_preference,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id)
@@ -96,6 +98,7 @@ export default function Onboarding() {
         weeklyFrequency: form.weekly_frequency,
         equipmentAccess: form.equipment_access,
         availableDays: form.available_days,
+        splitPreference: form.split_preference,
       })
 
       await refreshProfile()
@@ -266,6 +269,19 @@ export default function Onboarding() {
                   value={form.session_duration_min}
                   onChange={(e) => update('session_duration_min', e.target.value)}
                 />
+              </Field>
+
+              <Field label="Tipo de divisão do treino">
+                <select className="input" value={form.split_preference} onChange={(e) => update('split_preference', e.target.value)}>
+                  {Object.entries(SPLIT_PREFERENCES).map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+                {form.split_preference === 'full_body' && (
+                  <p className="text-xs text-neutral-500 mt-1">Todo treino trabalha o corpo inteiro, com pequenas variações de exercícios entre os dias.</p>
+                )}
               </Field>
 
               {error && <p className="text-red-400 text-sm">{error}</p>}
