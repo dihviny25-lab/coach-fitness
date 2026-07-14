@@ -3,13 +3,17 @@
 App web (React + Supabase) para treino, medidas corporais e nutrição, feito para uso pessoal (você e sua esposa, cada um com sua conta e dados privados).
 
 ## O que já funciona
-- Login / criação de conta (e-mail e senha)
-- Onboarding: sexo, idade, altura, peso, objetivo (emagrecimento, ganho de massa, força, recomposição, saúde geral), nível e frequência semanal
+- Login / criação de conta (e-mail e senha, com confirmação por e-mail)
+- Onboarding em 3 etapas: perfil (sexo, idade, altura, peso, objetivo, nível, frequência semanal), alimentação (padrão alimentar, restrições) e rotina (dias disponíveis, equipamentos, tempo por treino)
 - Cálculo automático de meta de calorias e macros (TMB + nível de atividade + objetivo)
+- Geração automática de plano de treino (split por frequência/objetivo/equipamento), com botão para iniciar o treino do dia
+- Sugestão de progressão de carga: com base na última sessão daquele exercício, sugere aumentar carga, repetir ou tentar mais uma rep
+- Vídeo de execução (YouTube) para cada exercício da biblioteca
 - Treino: criar treino, registrar séries (exercício, reps, carga, RPE), histórico
 - Medidas: peso, %gordura, circunferências, gráfico de evolução do peso
-- Nutrição: registrar refeições por uma lista de alimentos (ou "alimento livre" só com calorias), resumo diário vs. meta
+- Nutrição: registrar refeições por uma lista de alimentos (ou "alimento livre" só com calorias), resumo diário vs. meta, e sugestão automática de cardápio (respeitando padrão alimentar)
 - Dashboard com dicas simples do "coach" (ex: dias sem treinar, distância da meta calórica)
+- PWA instalável (funciona como app no celular, com ícone próprio)
 - Cada usuário só vê seus próprios dados (segurança via RLS no Supabase)
 
 ## Como rodar localmente (para editar/testar)
@@ -55,10 +59,8 @@ git push -u origin main
 O backend já está criado e ativo no Supabase (projeto `coach-fitness-app`). Tabelas: `profiles`, `body_measurements`, `workouts`, `workout_sets`, `exercises`, `foods`, `meal_logs`. Todas com Row Level Security — cada pessoa só acessa seus próprios registros. `exercises` e `foods` são bibliotecas compartilhadas (28 exercícios e 25 alimentos básicos já cadastrados) que dá pra ir completando com o tempo.
 
 ## Próximos passos sugeridos
-- Adicionar mais exercícios/alimentos à biblioteca (ou importar uma base maior)
 - Fotos de progresso
 - Notificações/lembretes
-- Periodização automática de treino (progressão de carga sugerida)
 
 ## Login com Google
 O botão "Continuar com Google" já está no app. Para ativá-lo de fato, faltam 2 passos que só você pode fazer (usam sua conta):

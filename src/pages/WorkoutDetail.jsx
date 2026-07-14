@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { Trash2, CheckCircle2, PlayCircle } from 'lucide-react'
+import { Trash2, CheckCircle2, PlayCircle, TrendingUp } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { suggestNextLoad } from '../lib/progression'
 
 function VideoLink({ url }) {
   if (!url) return null
@@ -31,6 +32,7 @@ export default function WorkoutDetail() {
   const [weight, setWeight] = useState('')
   const [rpe, setRpe] = useState('')
   const [saving, setSaving] = useState(false)
+  const [suggestion, setSuggestion] = useState(null)
 
   async function load() {
     const { data: w, error: workoutError } = await supabase.from('workouts').select('*').eq('id', id).single()
@@ -63,6 +65,38 @@ export default function WorkoutDetail() {
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
+
+  useEffect(() => {
+    if (!exerciseId) {
+      setSuggestion(null)
+      return
+    }
+    let cancelled = false
+    async function loadSuggestion() {
+      const { data } = await supabase
+        .from('workout_sets')
+        .select('reps, weight_kg, rpe, workout_id')
+        .eq('exercise_id', exerciseId)
+        .neq('workout_id', id)
+        .order('created_at', { ascending: false })
+        .limit(15)
+      if (cancelled) return
+      const lastWorkoutId = data?.[0]?.workout_id
+      const previousSets = lastWorkoutId ? data.filter((s) => s.workout_id === lastWorkoutId) : []
+      const targetReps = planExercises.find((pe) => pe.exercise_id === exerciseId)?.target_reps
+      setSuggestion(suggestNextLoad(previousSets, targetReps))
+    }
+    loadSuggestion()
+    return () => {
+      cancelled = true
+    }
+  }, [exerciseId, id, planExercises])
+
+  function applySuggestion() {
+    if (!suggestion) return
+    if (suggestion.weight != null) setWeight(String(suggestion.weight))
+    if (suggestion.reps != null) setReps(String(suggestion.reps))
+  }
 
   const grouped = useMemo(() => {
     const map = new Map()
@@ -177,6 +211,17 @@ export default function WorkoutDetail() {
           ))}
         </select>
         {exerciseId && <VideoLink url={exercises.find((ex) => ex.id === exerciseId)?.video_url} />}
+        {suggestion && (
+          <div className="flex items-center justify-between gap-2 bg-brand-950/30 border border-brand-500/20 rounded-lg px-3 py-2">
+            <p className="text-xs text-neutral-300 flex items-center gap-1.5">
+              <TrendingUp size={14} className="text-brand-400 shrink-0" />
+              {suggestion.note}
+            </p>
+            <button type="button" onClick={applySuggestion} className="text-xs font-semibold text-brand-400 hover:text-brand-300 transition shrink-0">
+              Usar
+            </button>
+          </div>
+        )}
         <div className="grid grid-cols-3 gap-3">
           <input className="input" type="number" placeholder="Reps" value={reps} onChange={(e) => setReps(e.target.value)} />
           <input className="input" type="number" step="0.5" placeholder="Carga (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} />
