@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Dumbbell, Plus, Play, ListChecks } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -8,6 +8,7 @@ import { WEEKDAY_LABELS } from '../lib/planGenerator'
 
 export default function Workouts() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [workouts, setWorkouts] = useState([])
   const [plan, setPlan] = useState(null)
   const [planLoading, setPlanLoading] = useState(true)
@@ -48,7 +49,7 @@ export default function Workouts() {
       .single()
     setCreating(false)
     if (!error && data) {
-      window.location.href = `/treinos/${data.id}`
+      navigate(`/treinos/${data.id}`)
     }
   }
 
@@ -62,7 +63,7 @@ export default function Workouts() {
       .single()
     setStartingDayId(null)
     if (!error && data) {
-      window.location.href = `/treinos/${data.id}`
+      navigate(`/treinos/${data.id}`)
     }
   }
 
