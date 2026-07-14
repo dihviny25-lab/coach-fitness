@@ -1,7 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { Trash2, CheckCircle2 } from 'lucide-react'
+import { Trash2, CheckCircle2, PlayCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+
+function VideoLink({ url }) {
+  if (!url) return null
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 text-xs text-brand-400 hover:text-brand-300 transition"
+    >
+      <PlayCircle size={14} />
+      Ver vídeo
+    </a>
+  )
+}
 
 export default function WorkoutDetail() {
   const { id } = useParams()
@@ -26,18 +41,18 @@ export default function WorkoutDetail() {
     setWorkout(w)
     const { data: s } = await supabase
       .from('workout_sets')
-      .select('*, exercises(name, muscle_group)')
+      .select('*, exercises(name, muscle_group, video_url)')
       .eq('workout_id', id)
       .order('created_at', { ascending: true })
     setSets(s || [])
     if (exercises.length === 0) {
-      const { data: ex } = await supabase.from('exercises').select('id, name, muscle_group').order('name')
+      const { data: ex } = await supabase.from('exercises').select('id, name, muscle_group, video_url').order('name')
       setExercises(ex || [])
     }
     if (w?.plan_day_id) {
       const { data: pe } = await supabase
         .from('workout_plan_exercises')
-        .select('*, exercises(name, muscle_group)')
+        .select('*, exercises(name, muscle_group, video_url)')
         .eq('plan_day_id', w.plan_day_id)
         .order('order_index', { ascending: true })
       setPlanExercises(pe || [])
@@ -53,8 +68,8 @@ export default function WorkoutDetail() {
     const map = new Map()
     for (const s of sets) {
       const label = s.exercises?.name || s.exercise_name || 'Exercício'
-      if (!map.has(label)) map.set(label, [])
-      map.get(label).push(s)
+      if (!map.has(label)) map.set(label, { videoUrl: s.exercises?.video_url, sets: [] })
+      map.get(label).sets.push(s)
     }
     return Array.from(map.entries())
   }, [sets])
@@ -123,26 +138,28 @@ export default function WorkoutDetail() {
       {planExercises.length > 0 && (
         <div className="card space-y-2">
           <p className="section-label">Sugestão do plano</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="space-y-1.5">
             {planExercises.map((pe) => {
               const done = sets.filter((s) => s.exercise_id === pe.exercise_id).length
               const complete = pe.target_sets && done >= pe.target_sets
               return (
-                <button
-                  key={pe.id}
-                  type="button"
-                  onClick={() => setExerciseId(pe.exercise_id)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-                    complete
-                      ? 'bg-green-500/10 text-green-400 border-green-500/30'
-                      : exerciseId === pe.exercise_id
-                        ? 'bg-brand-500 text-white border-brand-500'
-                        : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-600'
-                  }`}
-                >
-                  {complete && <CheckCircle2 size={12} />}
-                  {pe.exercises?.name} · {done}/{pe.target_sets ?? '-'} × {pe.target_reps}
-                </button>
+                <div key={pe.id} className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setExerciseId(pe.exercise_id)}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                      complete
+                        ? 'bg-green-500/10 text-green-400 border-green-500/30'
+                        : exerciseId === pe.exercise_id
+                          ? 'bg-brand-500 text-white border-brand-500'
+                          : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-600'
+                    }`}
+                  >
+                    {complete && <CheckCircle2 size={12} />}
+                    {pe.exercises?.name} · {done}/{pe.target_sets ?? '-'} × {pe.target_reps}
+                  </button>
+                  <VideoLink url={pe.exercises?.video_url} />
+                </div>
               )
             })}
           </div>
@@ -159,6 +176,7 @@ export default function WorkoutDetail() {
             </option>
           ))}
         </select>
+        {exerciseId && <VideoLink url={exercises.find((ex) => ex.id === exerciseId)?.video_url} />}
         <div className="grid grid-cols-3 gap-3">
           <input className="input" type="number" placeholder="Reps" value={reps} onChange={(e) => setReps(e.target.value)} />
           <input className="input" type="number" step="0.5" placeholder="Carga (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} />
@@ -171,11 +189,14 @@ export default function WorkoutDetail() {
 
       <div className="space-y-3">
         {grouped.length === 0 && <p className="text-sm text-neutral-500">Nenhuma série registrada ainda.</p>}
-        {grouped.map(([label, groupSets]) => (
+        {grouped.map(([label, group]) => (
           <div key={label} className="card">
-            <p className="font-semibold text-white mb-2">{label}</p>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="font-semibold text-white">{label}</p>
+              <VideoLink url={group.videoUrl} />
+            </div>
             <div className="space-y-1">
-              {groupSets.map((s) => (
+              {group.sets.map((s) => (
                 <div key={s.id} className="flex items-center justify-between text-sm text-neutral-300">
                   <span>
                     Série {s.set_number}: <span className="text-brand-400 font-semibold">{s.reps ?? '-'}</span> reps ×{' '}

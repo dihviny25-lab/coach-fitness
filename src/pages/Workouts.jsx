@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Dumbbell, Plus, Play, ListChecks } from 'lucide-react'
+import { Dumbbell, Plus, Play, ListChecks, PlayCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { loadActivePlan } from '../lib/plan'
@@ -106,7 +106,24 @@ export default function Workouts() {
                     {startingDayId === day.id ? 'Criando...' : 'Iniciar'}
                   </button>
                 </div>
-                <p className="text-xs text-neutral-500">{day.workout_plan_exercises.map((pe) => pe.exercises?.name).join(', ')}</p>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                  {day.workout_plan_exercises.map((pe) => (
+                    <span key={pe.id} className="inline-flex items-center gap-1 text-xs text-neutral-500">
+                      {pe.exercises?.name}
+                      {pe.exercises?.video_url && (
+                        <a
+                          href={pe.exercises.video_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-brand-400 hover:text-brand-300 transition"
+                          title="Ver vídeo"
+                        >
+                          <PlayCircle size={12} />
+                        </a>
+                      )}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

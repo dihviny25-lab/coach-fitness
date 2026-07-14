@@ -45,7 +45,7 @@ export async function createWorkoutPlan(userId, profileFields) {
 export async function loadActivePlan(userId) {
   const { data, error } = await supabase
     .from('workout_plans')
-    .select('*, workout_plan_days(*, workout_plan_exercises(*, exercises(name, muscle_group, equipment)))')
+    .select('*, workout_plan_days(*, workout_plan_exercises(*, exercises(name, muscle_group, equipment, video_url)))')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
