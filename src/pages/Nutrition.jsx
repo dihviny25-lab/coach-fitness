@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Apple } from 'lucide-react'
+import { Apple, Sparkles } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { calcTargets } from '../lib/coach'
+import { generateMealPlan } from '../lib/dietGenerator'
 
 const MEAL_LABELS = { cafe: 'Café da manhã', almoco: 'Almoço', jantar: 'Jantar', lanche: 'Lanche' }
 
@@ -19,6 +20,7 @@ export default function Nutrition() {
   const [customName, setCustomName] = useState('')
   const [useCustom, setUseCustom] = useState(false)
   const [customCalories, setCustomCalories] = useState('')
+  const [usingMeal, setUsingMeal] = useState(null)
 
   async function load() {
     const { data: l } = await supabase
@@ -61,6 +63,11 @@ export default function Nutrition() {
       goal: profile.goal,
     })
   }, [profile, latestWeight])
+
+  const mealPlan = useMemo(() => {
+    if (!targets || foods.length === 0) return null
+    return generateMealPlan({ targets, dietaryPattern: profile?.dietary_pattern || 'sem_restricao' }, foods)
+  }, [targets, foods, profile?.dietary_pattern])
 
   const totals = useMemo(() => {
     return logs.reduce(
@@ -127,6 +134,25 @@ export default function Nutrition() {
     load()
   }
 
+  async function applySuggestedMeal(meal) {
+    setUsingMeal(meal.type)
+    const rows = meal.items.map((it) => ({
+      user_id: user.id,
+      date,
+      meal_type: meal.type,
+      food_id: it.food_id,
+      food_name: it.food_name,
+      quantity_g: it.quantity_g,
+      calories: it.calories,
+      protein_g: it.protein_g,
+      carbs_g: it.carbs_g,
+      fat_g: it.fat_g,
+    }))
+    const { error } = await supabase.from('meal_logs').insert(rows)
+    setUsingMeal(null)
+    if (!error) load()
+  }
+
   const grouped = useMemo(() => {
     const map = { cafe: [], almoco: [], jantar: [], lanche: [] }
     for (const l of logs) {
@@ -155,6 +181,38 @@ export default function Nutrition() {
       ) : (
         <div className="card text-sm text-neutral-500">
           Complete seu perfil e registre um peso em Medidas para calcular suas metas de calorias e macros automaticamente.
+        </div>
+      )}
+
+      {mealPlan && (
+        <div className="card space-y-3">
+          <div className="flex items-center gap-1.5">
+            <Sparkles size={14} className="text-brand-400" />
+            <p className="section-label">Sugestão de cardápio de hoje</p>
+          </div>
+          {profile?.dietary_notes && (
+            <p className="text-xs text-neutral-500">Lembrando suas restrições: {profile.dietary_notes}</p>
+          )}
+          <div className="space-y-2">
+            {mealPlan.meals.map((meal) => (
+              <div key={meal.type} className="border border-neutral-800 bg-neutral-950/60 rounded-xl p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-semibold text-white text-sm">{MEAL_LABELS[meal.type]}</p>
+                  <button
+                    type="button"
+                    className="btn-secondary text-xs py-1 px-2"
+                    disabled={usingMeal === meal.type}
+                    onClick={() => applySuggestedMeal(meal)}
+                  >
+                    {usingMeal === meal.type ? 'Adicionando...' : 'Usar'}
+                  </button>
+                </div>
+                <p className="text-xs text-neutral-500">
+                  {meal.items.map((it) => `${it.food_name} (${it.quantity_g}g)`).join(' + ')} — {meal.totals.calories} kcal
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
