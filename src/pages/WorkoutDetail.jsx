@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Trash2, CheckCircle2, PlayCircle, TrendingUp } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { suggestNextLoad } from '../lib/progression'
+import RestTimer from '../components/RestTimer'
 
 function VideoLink({ url }) {
   if (!url) return null
@@ -33,6 +34,7 @@ export default function WorkoutDetail() {
   const [rpe, setRpe] = useState('')
   const [saving, setSaving] = useState(false)
   const [suggestion, setSuggestion] = useState(null)
+  const timerRef = useRef(null)
 
   async function load() {
     const { data: w, error: workoutError } = await supabase.from('workouts').select('*').eq('id', id).single()
@@ -128,6 +130,7 @@ export default function WorkoutDetail() {
       setReps('')
       setWeight('')
       setRpe('')
+      timerRef.current?.start()
       load()
     }
   }
@@ -231,6 +234,8 @@ export default function WorkoutDetail() {
           {saving ? 'Salvando...' : 'Adicionar série'}
         </button>
       </form>
+
+      <RestTimer ref={timerRef} />
 
       <div className="space-y-3">
         {grouped.length === 0 && <p className="text-sm text-neutral-500">Nenhuma série registrada ainda.</p>}

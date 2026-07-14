@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Dumbbell, Plus, Play, ListChecks, PlayCircle } from 'lucide-react'
+import { Dumbbell, Plus, Play, ListChecks, PlayCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { loadActivePlan } from '../lib/plan'
@@ -13,6 +13,7 @@ export default function Workouts() {
   const [plan, setPlan] = useState(null)
   const [planLoading, setPlanLoading] = useState(true)
   const [startingDayId, setStartingDayId] = useState(null)
+  const [expandedDay, setExpandedDay] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
@@ -90,42 +91,69 @@ export default function Workouts() {
             </div>
           </div>
           <div className="space-y-2">
-            {plan.workout_plan_days.map((day) => (
-              <div key={day.id} className="border border-neutral-800 bg-neutral-950/60 rounded-xl p-3">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="font-semibold text-white text-sm">
-                    {day.name}
-                    {day.weekday && <span className="text-neutral-500 font-normal"> · {WEEKDAY_LABELS[day.weekday]}</span>}
-                  </p>
-                  <button
-                    className="btn-primary text-xs py-1 px-2 flex items-center gap-1"
-                    disabled={startingDayId === day.id}
-                    onClick={() => startPlanDay(day)}
-                  >
-                    <Play size={12} />
-                    {startingDayId === day.id ? 'Criando...' : 'Iniciar'}
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
-                  {day.workout_plan_exercises.map((pe) => (
-                    <span key={pe.id} className="inline-flex items-center gap-1 text-xs text-neutral-500">
-                      {pe.exercises?.name}
-                      {pe.exercises?.video_url && (
-                        <a
-                          href={pe.exercises.video_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-brand-400 hover:text-brand-300 transition"
-                          title="Ver vídeo"
-                        >
-                          <PlayCircle size={12} />
-                        </a>
+            {plan.workout_plan_days.map((day) => {
+              const expanded = expandedDay === day.id
+              return (
+                <div key={day.id} className="border border-neutral-800 bg-neutral-950/60 rounded-xl p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedDay(expanded ? null : day.id)}
+                      className="flex items-center gap-1.5 text-left"
+                    >
+                      {expanded ? (
+                        <ChevronUp size={14} className="text-neutral-500 shrink-0" />
+                      ) : (
+                        <ChevronDown size={14} className="text-neutral-500 shrink-0" />
                       )}
-                    </span>
-                  ))}
+                      <p className="font-semibold text-white text-sm">
+                        {day.name}
+                        {day.weekday && <span className="text-neutral-500 font-normal"> · {WEEKDAY_LABELS[day.weekday]}</span>}
+                      </p>
+                    </button>
+                    <button
+                      className="btn-primary text-xs py-1 px-2 flex items-center gap-1 shrink-0"
+                      disabled={startingDayId === day.id}
+                      onClick={() => startPlanDay(day)}
+                    >
+                      <Play size={12} />
+                      {startingDayId === day.id ? 'Criando...' : 'Iniciar'}
+                    </button>
+                  </div>
+
+                  {expanded ? (
+                    <div className="space-y-1.5 mt-2">
+                      {day.workout_plan_exercises.map((pe) => (
+                        <div key={pe.id} className="flex items-center justify-between text-xs">
+                          <span className="text-neutral-300">
+                            {pe.exercises?.name} <span className="text-neutral-500">· {pe.target_sets ?? '-'}x{pe.target_reps}</span>
+                          </span>
+                          {pe.exercises?.video_url && (
+                            <a
+                              href={pe.exercises.video_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-brand-400 hover:text-brand-300 transition shrink-0"
+                            >
+                              <PlayCircle size={12} />
+                              Ver vídeo
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                      {day.workout_plan_exercises.map((pe) => (
+                        <span key={pe.id} className="text-xs text-neutral-500">
+                          {pe.exercises?.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
