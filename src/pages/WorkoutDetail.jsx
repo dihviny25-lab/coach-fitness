@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Trash2, CheckCircle2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -7,6 +7,7 @@ export default function WorkoutDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [workout, setWorkout] = useState(null)
+  const [notFound, setNotFound] = useState(false)
   const [sets, setSets] = useState([])
   const [exercises, setExercises] = useState([])
   const [planExercises, setPlanExercises] = useState([])
@@ -17,7 +18,11 @@ export default function WorkoutDetail() {
   const [saving, setSaving] = useState(false)
 
   async function load() {
-    const { data: w } = await supabase.from('workouts').select('*').eq('id', id).single()
+    const { data: w, error: workoutError } = await supabase.from('workouts').select('*').eq('id', id).single()
+    if (workoutError || !w) {
+      setNotFound(true)
+      return
+    }
     setWorkout(w)
     const { data: s } = await supabase
       .from('workout_sets')
@@ -87,6 +92,17 @@ export default function WorkoutDetail() {
     if (!confirm('Excluir este treino e todas as séries registradas?')) return
     await supabase.from('workouts').delete().eq('id', id)
     navigate('/treinos')
+  }
+
+  if (notFound) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-3">
+        <p className="text-sm text-neutral-400">Esse treino não existe mais ou não está disponível.</p>
+        <Link to="/treinos" className="text-brand-400 text-sm font-medium hover:text-brand-300 transition">
+          Voltar para Treinos
+        </Link>
+      </div>
+    )
   }
 
   if (!workout) return <div className="max-w-2xl mx-auto px-4 py-6 text-sm text-neutral-500">Carregando...</div>
